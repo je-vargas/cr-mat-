@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Union, List
 
 
-@dataclass
+@dataclass #* decorator basically adds a constructor with declared class attributes == __init__
 class HourlyTask:
     """A task to be done every hour, and backfilled if not up to date."""
 
@@ -12,7 +12,7 @@ class HourlyTask:
     start_from: datetime
 
     #: Until when should this task occur?
-    repeat_until: Union[datetime, None] = None
+    repeat_until: Union[datetime, None] = None #* union is either data type declared.
 
     #: What, if any, is the first time that has been done for this task?
     earliest_done: Union[datetime, None] = None
@@ -24,11 +24,15 @@ class HourlyTask:
     @property
     def next_to_do(self) -> Union[datetime, None]:
         """Return the next datetime that needs doing."""
-        raise NotImplementedError("Fill me in!")
+        #* I think we return the next hour to -> so this is the hour after the start from
+        next_task = self.start_from.hour
+        return self.start_from
 
     def schedule(self, when: datetime) -> None:
         """Schedule this task at the 'when' time, update local time markers."""
         raise NotImplementedError("Fill me in!")
+        #* if understoof correctly being when means the when the task starts so from the start time set this back to the previous complete hour 
+
 
 
 class Scheduler:
@@ -48,7 +52,8 @@ class Scheduler:
 
     def get_tasks_to_do(self) -> List[HourlyTask]:
         """Get the list of tasks that need doing."""
-        return []
+        # return []
+        return self.task_store
 
     def schedule_tasks(self) -> None:
         """Schedule the tasks.
@@ -89,3 +94,6 @@ class Controller:
             elapsed = after - before
             wait = self.throttle_wait.total_seconds() - elapsed.total_seconds()
             time.sleep(max([0, wait]))
+
+
+# ------------------
