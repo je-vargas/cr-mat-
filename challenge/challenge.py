@@ -2,6 +2,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Union, List
+from freezegun import freeze_time
 
 
 @dataclass #* decorator basically adds a constructor with declared class attributes == __init__
@@ -24,14 +25,15 @@ class HourlyTask:
     @property
     def next_to_do(self) -> Union[datetime, None]:
         """Return the next datetime that needs doing."""
-        #* I think we return the next hour to -> so this is the hour after the start from
-        next_task = self.start_from.hour
-        return self.start_from
+        next_time = self.start_from + timedelta(hours=1)
+        return next_time
 
     def schedule(self, when: datetime) -> None:
         """Schedule this task at the 'when' time, update local time markers."""
-        raise NotImplementedError("Fill me in!")
-        #* if understoof correctly being when means the when the task starts so from the start time set this back to the previous complete hour 
+        #! when time set back a complete hour
+        previous_hour = self.start_from - timedelta(hours=1)
+        self.latest_done = previous_hour
+        
 
 
 
@@ -52,7 +54,6 @@ class Scheduler:
 
     def get_tasks_to_do(self) -> List[HourlyTask]:
         """Get the list of tasks that need doing."""
-        # return []
         return self.task_store
 
     def schedule_tasks(self) -> None:
@@ -97,3 +98,19 @@ class Controller:
 
 
 # ------------------
+
+task = HourlyTask(start_from=datetime(2022, 8, 1, 23, 15))
+next_day = task.next_to_do
+
+# sch = Scheduler()
+# with freeze_time(datetime(2022, 8, 1, 8, 15)):
+#     yesterday = datetime(2022, 7, 31)
+#     task_too_late = HourlyTask(start_from=datetime.utcnow())
+#     task_with_todo = HourlyTask(start_from=yesterday)
+#     task_done = HourlyTask(
+#         start_from=yesterday,
+#         latest_done=datetime(2022, 8, 1, 7)
+#     )
+#     sch.register_tasks([task_too_late, task_with_todo, task_done])
+#     todos = sch.get_tasks_to_do()
+#     todos == [task_with_todo]
