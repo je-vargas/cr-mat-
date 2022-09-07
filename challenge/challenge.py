@@ -13,7 +13,7 @@ class HourlyTask:
     start_from: datetime
 
     #: Until when should this task occur?
-    repeat_until: Union[datetime, None] = None #* union is either data type declared.
+    repeat_until: Union[datetime, None] = None
 
     #: What, if any, is the first time that has been done for this task?
     earliest_done: Union[datetime, None] = None
@@ -30,10 +30,11 @@ class HourlyTask:
 
     def schedule(self, when: datetime) -> None:
         """Schedule this task at the 'when' time, update local time markers."""
-        #! when time set back a complete hour
+        #! when -> time set back a complete hour
         previous_hour = self.start_from - timedelta(hours=1)
         self.latest_done = previous_hour
         
+        # repeat until and earliest done also set here i think! 
 
 
 
@@ -99,18 +100,18 @@ class Controller:
 
 # ------------------
 
-task = HourlyTask(start_from=datetime(2022, 8, 1, 23, 15))
-next_day = task.next_to_do
+# task = HourlyTask(start_from=datetime(2022, 8, 1, 23, 15))
+# next_day = task.next_to_do
 
-# sch = Scheduler()
-# with freeze_time(datetime(2022, 8, 1, 8, 15)):
-#     yesterday = datetime(2022, 7, 31)
-#     task_too_late = HourlyTask(start_from=datetime.utcnow())
-#     task_with_todo = HourlyTask(start_from=yesterday)
-#     task_done = HourlyTask(
-#         start_from=yesterday,
-#         latest_done=datetime(2022, 8, 1, 7)
-#     )
-#     sch.register_tasks([task_too_late, task_with_todo, task_done])
-#     todos = sch.get_tasks_to_do()
-#     todos == [task_with_todo]
+sch = Scheduler()
+with freeze_time(datetime(2022, 8, 1, 8, 15)):
+    yesterday = datetime(2022, 7, 31)
+    task_too_late = HourlyTask(start_from=datetime.utcnow())
+    task_with_todo = HourlyTask(start_from=yesterday)
+    task_done = HourlyTask(
+        start_from=yesterday,
+        latest_done=datetime(2022, 8, 1, 7)
+    )
+    sch.register_tasks([task_too_late, task_with_todo, task_done])
+    todos = sch.get_tasks_to_do()
+    todos == [task_with_todo]
