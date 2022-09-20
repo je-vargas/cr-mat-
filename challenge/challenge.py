@@ -25,16 +25,22 @@ class HourlyTask:
     @property
     def next_to_do(self) -> Union[datetime, None]:
         """Return the next datetime that needs doing."""
+        minutes = self.start_from.minute
         next_time = self.start_from + timedelta(hours=1)
+        next_time = next_time - timedelta(minutes=minutes)
         return next_time
 
     def schedule(self, when: datetime) -> None:
         """Schedule this task at the 'when' time, update local time markers."""
         #! when -> time set back a complete hour
         previous_hour = self.start_from - timedelta(hours=1)
+        previous_hour
         self.latest_done = previous_hour
-        
-        # repeat until and earliest done also set here i think! 
+
+    def back_fill(self, backfill:datetime) -> None:
+        #not sure yet how the eariest_done is set - but backfilling from what i understand serves to track the progress when going back in time. 
+        # not sure if this follows the same rule of starting an hour later from the task time? in which case we take 2 hours.
+        self.earliest_done = None
 
 
 
@@ -55,11 +61,11 @@ class Scheduler:
 
     def get_tasks_to_do(self) -> List[HourlyTask]:
         """Get the list of tasks that need doing."""
+        self.task_store.sort(key=lambda x: x.start_from)
         return self.task_store
 
     def schedule_tasks(self) -> None:
         """Schedule the tasks.
-
         Tasks should be prioritised so that tasks with a recent "to do" date
         are done before any that need backfilling.
         """
@@ -67,7 +73,7 @@ class Scheduler:
         now = datetime.utcnow()
         now_hour_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         last_hour_start = now_hour_start - timedelta(hours=1)
-        [task.schedule(last_hour_start) for task in tasks]
+        [task.schedule(last_hour_start) for task in sorted_tasks]
 
 
 @dataclass
@@ -100,8 +106,19 @@ class Controller:
 
 # ------------------
 
+# def task_order(task_list):
+#     print(f"{task_list} \n")
+
+# x1 = HourlyTask(datetime(2022, 7, 31, 17))
+# x2 = HourlyTask(datetime(2022, 3, 31, 2, 13))
+# x3 = HourlyTask(datetime(2022, 10, 31, 23))
+# l = [x1, x2, x3]
+# x1.start_from
+# task_order(l)
+
 # task = HourlyTask(start_from=datetime(2022, 8, 1, 23, 15))
 # next_day = task.next_to_do
+
 
 sch = Scheduler()
 with freeze_time(datetime(2022, 8, 1, 8, 15)):
@@ -114,4 +131,10 @@ with freeze_time(datetime(2022, 8, 1, 8, 15)):
     )
     sch.register_tasks([task_too_late, task_with_todo, task_done])
     todos = sch.get_tasks_to_do()
-    todos == [task_with_todo]
+    
+    print(todos == [task_with_todo])
+
+
+
+
+
